@@ -1,29 +1,38 @@
 {% extends "base.html" %}
+{% block title %}Вход{% endblock %}
 
 {% block content %}
-    <h1>Авторизация</h1>
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.email.label }}<br>
-            {{ form.email(class="form-control", type="email") }}<br>
-            {% for error in form.email.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }}<br>
-            {{ form.password(class="form-control", type="password") }}<br>
-            {% for error in form.password.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </p>
-        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-        <div>{{ message }}</div>
-    </form>
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <!-- Заголовок страницы -->
+      <h2 class="text-center mb-3">Вход</h2>
+      <hr>
+      <!-- Форма входа -->
+      <form method="POST" action="/login">
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="loginEmail" class="form-label">Почта</label>
+          <input type="email" class="form-control" id="loginEmail" name="email" placeholder="Введите email" required>
+        </div>
+        <!-- Пароль -->
+        <div class="mb-3">
+          <label for="loginPassword" class="form-label">Пароль</label>
+          <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Введите пароль" required>
+        </div>
+        <!-- Чекбокс "Запомнить меня" -->
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="rememberLogin" name="remember_me">
+          <label class="form-check-label" for="rememberLogin">Запомнить меня</label>
+        </div>
+        <!-- Кнопка входа -->
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Войти</button>
+        </div>
+      </form>
+      <hr>
+      <p class="text-center">Нет аккаунта? <a href="/register">Зарегистрироваться</a>.</p>
+    </div>
+  </div>
+</div>
 {% endblock %}
