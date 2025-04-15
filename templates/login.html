@@ -5,33 +5,58 @@
 <div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <!-- Заголовок страницы -->
       <h2 class="text-center mb-3">Вход</h2>
       <hr>
-      <!-- Форма входа -->
       <form method="POST" action="/login">
-        <!-- Email -->
+        {{ form.hidden_tag() }}
+
+        <!-- Поле Email -->
         <div class="mb-3">
-          <label for="loginEmail" class="form-label">Почта</label>
-          <input type="email" class="form-control" id="loginEmail" name="email" placeholder="Введите email" required>
+          {{ form.email.label(class="form-label") }}
+          {{ form.email(class="form-control", placeholder="Введите email") }}
+          {% if form.email.errors %}
+            <div class="text-danger">
+              {% for error in form.email.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- Пароль -->
+
+        <!-- Поле Пароль -->
         <div class="mb-3">
-          <label for="loginPassword" class="form-label">Пароль</label>
-          <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Введите пароль" required>
+          {{ form.password.label(class="form-label") }}
+          {{ form.password(class="form-control", placeholder="Введите пароль") }}
+          {% if form.password.errors %}
+            <div class="text-danger">
+              {% for error in form.password.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
+
         <!-- Чекбокс "Запомнить меня" -->
         <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="rememberLogin" name="remember_me">
-          <label class="form-check-label" for="rememberLogin">Запомнить меня</label>
+          {{ form.remember_me(class="form-check-input") }}
+          {{ form.remember_me.label(class="form-check-label") }}
         </div>
-        <!-- Кнопка входа -->
+
+        <!-- Кнопка "Войти" -->
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">Войти</button>
+          {{ form.submit(class="btn btn-primary") }}
         </div>
       </form>
       <hr>
-      <p class="text-center">Нет аккаунта? <a href="/register">Зарегистрироваться</a>.</p>
+      <p class="text-center">Нет аккаунта? <a href="/registration">Зарегистрироваться</a>.</p>
+        {% if errors %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {% for error in errors %}
+      <p class="mb-0">{{ error }}</p>
+    {% endfor %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+  </div>
+{% endif %}
     </div>
   </div>
 </div>

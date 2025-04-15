@@ -5,44 +5,79 @@
 <div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <!-- Заголовок страницы -->
       <h2 class="text-center mb-3">Регистрация</h2>
       <hr>
-      <!-- Форма регистрации -->
       <form method="POST" action="/register">
-        <!-- Никнейм -->
+        {{ form.hidden_tag() }}
+
         <div class="mb-3">
-          <label for="nickname" class="form-label">Никнейм</label>
-          <input type="text" class="form-control" id="nickname" name="nickname" placeholder="Введите никнейм" required>
+          {{ form.nickname.label(class="form-label") }}
+          {{ form.nickname(class="form-control", placeholder="Введите никнейм") }}
+          {% if form.nickname.errors %}
+            <div class="text-danger">
+              {% for error in form.nickname.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- Email -->
+
         <div class="mb-3">
-          <label for="email" class="form-label">Почта</label>
-          <input type="email" class="form-control" id="email" name="email" placeholder="Введите email" required>
+          {{ form.email.label(class="form-label") }}
+          {{ form.email(class="form-control", placeholder="Введите email") }}
+          {% if form.email.errors %}
+            <div class="text-danger">
+              {% for error in form.email.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- Пароль -->
+
         <div class="mb-3">
-          <label for="password" class="form-label">Пароль</label>
-          <input type="password" class="form-control" id="password" name="password" placeholder="Введите пароль" required>
+          {{ form.password.label(class="form-label") }}
+          {{ form.password(class="form-control", placeholder="Введите пароль") }}
+          {% if form.password.errors %}
+            <div class="text-danger">
+              {% for error in form.password.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- Повтор пароля -->
+
         <div class="mb-3">
-          <label for="confirmPassword" class="form-label">Повторите пароль</label>
-          <input type="password" class="form-control" id="confirmPassword" name="confirm_password" placeholder="Повторите пароль" required>
+          {{ form.password_repeat.label(class="form-label") }}
+          {{ form.password_repeat(class="form-control", placeholder="Повторите пароль") }}
+          {% if form.password_repeat.errors %}
+            <div class="text-danger">
+              {% for error in form.password_repeat.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- О себе -->
+
         <div class="mb-3">
-          <label for="about" class="form-label">О себе</label>
-          <textarea class="form-control" id="about" name="about" rows="3" placeholder="Расскажите о себе"></textarea>
+          {{ form.about.label(class="form-label") }}
+          {{ form.about(class="form-control", placeholder="Расскажите о себе") }}
+
+          {% if form.about.errors %}
+            <div class="text-danger">
+              {% for error in form.about.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
-        <!-- Чекбокс "Запомнить меня" -->
+
         <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
-          <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+          {{ form.remember_me(class="form-check-input") }}
+          {{ form.remember_me.label(class="form-check-label") }}
         </div>
-        <!-- Кнопка регистрации -->
+
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+          {{ form.submit(class="btn btn-primary") }}
         </div>
       </form>
       <hr>

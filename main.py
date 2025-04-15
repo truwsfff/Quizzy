@@ -1,12 +1,14 @@
 # ------ Импорт прочих библиотек
 import datetime
+from config import SECRET_KEY
 
 # ------ Импорт flask инструментов
 from flask import Flask, render_template, session, redirect
 
 # ------ Импорт инструментов для регистрации
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, login_required, logout_user
 from forms.login_form import LoginForm
+from forms.register_form import RegisterForm
 
 # ------ Импорт всего связанного с бд
 from data import db_session
@@ -15,8 +17,7 @@ from data.users import User
 
 # ------ Конфигурация приложения
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '\
-A#4z!kWq89^fLm@0dR&t*YpC$xbNvT2jHeuMGc1ZVo6Qs7PiEyLDJgrX'
+app.config['SECRET_KEY'] = SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
@@ -38,7 +39,10 @@ def test():
 
 @app.route('/registration')
 def registration():
-    return render_template('register.html')
+    form = RegisterForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('register.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -51,12 +55,20 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               errors=['Неправильный логин или пароль'],
                                form=form)
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 
 @app.route('/profile')
+@login_required
 def profile():
     tests_list = [
     ]
