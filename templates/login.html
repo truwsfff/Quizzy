@@ -10,7 +10,6 @@
       <form method="POST" action="/login">
         {{ form.hidden_tag() }}
 
-        <!-- Поле Email -->
         <div class="mb-3">
           {{ form.email.label(class="form-label") }}
           {{ form.email(class="form-control", placeholder="Введите email") }}
@@ -23,7 +22,6 @@
           {% endif %}
         </div>
 
-        <!-- Поле Пароль -->
         <div class="mb-3">
           {{ form.password.label(class="form-label") }}
           {{ form.password(class="form-control", placeholder="Введите пароль") }}
@@ -36,27 +34,24 @@
           {% endif %}
         </div>
 
-        <!-- Чекбокс "Запомнить меня" -->
         <div class="mb-3 form-check">
           {{ form.remember_me(class="form-check-input") }}
           {{ form.remember_me.label(class="form-check-label") }}
         </div>
 
-        <!-- Кнопка "Войти" -->
         <div class="d-grid">
           {{ form.submit(class="btn btn-primary") }}
         </div>
       </form>
       <hr>
       <p class="text-center">Нет аккаунта? <a href="/registration">Зарегистрироваться</a>.</p>
-        {% if errors %}
+        {% if error_message %}
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {% for error in errors %}
-      <p class="mb-0">{{ error }}</p>
-    {% endfor %}
+    {{ error_message }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
   </div>
 {% endif %}
+
     </div>
   </div>
 </div>

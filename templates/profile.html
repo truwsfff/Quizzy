@@ -11,12 +11,12 @@
             <a href="/profile/avatar" class="btn btn-secondary btn-sm">Изменить аватар</a>
         </div>
         <div class="col-md-9">
-            <h1 class="mb-3">Добро пожаловать, truwsfff!</h1>
+            <h1 class="mb-3">Добро пожаловать, {{current_user.name}}!</h1>
             <p class="text-muted mb-0">
-                Дата регистрации: <strong>05.03.2009</strong>
+                Дата регистрации: <strong>{{current_user.created_date.strftime('%d.%m.%Y')}}</strong>
             </p>
             <p class="text-muted">
-                Ваша роль: <strong>АДМИН</strong>
+                Ваша роль: <strong>{{current_user.role}}</strong>
             </p>
         </div>
     </div>
