@@ -6,43 +6,71 @@
 
     <div class="row align-items-center mb-4">
         <div class="col-md-3 text-center">
-            <img src="{{ url_for('static', filename='quizzy_logo.png') }}" alt="Аватар пользователя" class="img-thumbnail mb-2" style="max-width: 150px;">
-            <br>
-            <a href="/profile/avatar" class="btn btn-secondary btn-sm">Изменить аватар</a>
+            <form method="POST" action="/profile/avatar" enctype="multipart/form-data" id="avatarForm">
+                <label for="avatarInput">
+                    <img src="{{ url_for('static', filename='quizzy_logo.png') }}" alt="Аватар пользователя" class="img-thumbnail mb-2" style="max-width: 150px; cursor: pointer;">
+                </label>
+                <input type="file" name="avatar" id="avatarInput" accept="image/*" class="d-none">
+                <br>
+                <button type="submit" class="btn btn-secondary btn-sm mt-2">Сменить аватар</button>
+            </form>
         </div>
         <div class="col-md-9">
-            <h1 class="mb-3">Добро пожаловать, {{current_user.name}}!</h1>
-            <p class="text-muted mb-0">
-                Дата регистрации: <strong>{{current_user.created_date.strftime('%d.%m.%Y')}}</strong>
-            </p>
-            <p class="text-muted">
-                Ваша роль: <strong>{{current_user.role}}</strong>
-            </p>
+            <h1 class="mb-3">Добро пожаловать, {{ current_user.name }}!</h1>
+            <p class="text-muted mb-0">Дата регистрации: <strong>{{ current_user.created_date.strftime('%d.%m.%Y') }}</strong></p>
+            <p class="text-muted">Ваша роль: <strong>{{ current_user.role }}</strong></p>
         </div>
+    </div>
+
+    <hr>
+
+    <h2 class="mt-4">Безопасность</h2>
+    <button class="btn btn-outline-warning mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#changePasswordForm" aria-expanded="false" aria-controls="changePasswordForm">
+        Изменить пароль
+    </button>
+
+    <div class="collapse" id="changePasswordForm">
+        <form method="POST" action="">
+            {{ password_form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ password_form.old_password.label(class="form-label") }}
+                {{ password_form.old_password(class="form-control", placeholder="Введите старый пароль") }}
+            </div>
+
+            <div class="mb-3">
+                {{ password_form.new_password.label(class="form-label") }}
+                {{ password_form.new_password(class="form-control", placeholder="Введите новый пароль") }}
+            </div>
+
+            <div class="mb-3">
+                {{ password_form.repeat_password.label(class="form-label") }}
+                {{ password_form.repeat_password(class="form-control", placeholder="Повторите новый пароль") }}
+            </div>
+
+            <button type="submit" class="btn btn-warning">Сменить пароль</button>
+        </form>
     </div>
 
     <hr>
 
     <h2 class="mt-4">Настройки профиля</h2>
     <form method="POST" action="/profile/update">
+        {{ form.hidden_tag() }}
+
         <div class="mb-3">
-            <label for="nameInput" class="form-label">Изменение имени</label>
-            <input type="text" class="form-control" id="nameInput" name="name" placeholder="Введите новое имя">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", placeholder="Введите новое имя") }}
         </div>
 
         <div class="mb-3">
-            <label for="emailInput" class="form-label">Изменение email</label>
-            <input type="email" class="form-control" id="emailInput" name="email" placeholder="Введите новый email">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", placeholder="Введите новый email") }}
         </div>
 
         <div class="mb-3">
-            <label for="passwordInput" class="form-label">Изменение пароля</label>
-            <input type="password" class="form-control" id="passwordInput" name="password" placeholder="Введите новый пароль">
-        </div>
-
-        <div class="mb-3">
-            <label for="aboutInput" class="form-label">О себе</label>
-            <textarea class="form-control" id="aboutInput" name="about" rows="3" placeholder="Расскажите о себе"></textarea>
+            {{ form.about.label(class="form-label") }}
+            {{ form.about(class="form-control", placeholder="Расскажите о себе", rows="3") }}
         </div>
 
         <button type="submit" class="btn btn-primary">Сохранить изменения</button>
@@ -69,18 +97,27 @@
         </div>
     {% else %}
         <div class="text-center my-5">
-        <p class="fs-5 text-muted">У вас пока нет никаких тестирований!</p>
+            <p class="fs-5 text-muted">У вас пока нет никаких тестирований!</p>
         </div>
     {% endif %}
 </div>
 
 <style>
     .test-card {
-        background: linear-gradient(
-            135deg,
-            #f8f9fa,  /* светло-серый */
-            #e9ecef   /* чуть темнее */
-        );
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     }
 </style>
+<script>
+    document.getElementById("avatarInput").addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById("avatarImage").src = e.target.result;
+                document.getElementById("avatarForm").submit();
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 {% endblock %}

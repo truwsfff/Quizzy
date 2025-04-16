@@ -6,9 +6,13 @@ from config import SECRET_KEY
 from flask import Flask, render_template, session, redirect
 
 # ------ Импорт инструментов для регистрации
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import (LoginManager, login_user, login_required,
+                         logout_user, \
+                         current_user)
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
+from forms.profile_general_form import ProfileGeneralForm
+from forms.profile_password_form import ProfilePasswordForm
 
 # ------ Импорт всего связанного с бд
 from data import db_session
@@ -47,7 +51,8 @@ def registration():
 Никнейм не должен превышать 15 символов и быть меньше 5 символов.',
                                    form=form)
 
-        for i in r"""!"#$%&'()*+,-./:;<=>?@[\]^`{|}~ абвгдеёжзийклмнопрстуфхцчшщъыьэюя""":
+        for i in r"""!"#$%&'()*+,-./:;<=>?@[\]^`{|}~ 
+        абвгдеёжзийклмнопрстуфхцчшщъыьэюя""":
             if i in form.nickname.data.strip().lower():
                 return render_template('register.html',
                                        error_message='\
@@ -113,12 +118,20 @@ def logout():
     return redirect("/")
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     tests_list = [
     ]
-    return render_template('profile.html', tests=tests_list)
+    form = ProfileGeneralForm()
+    password_form = ProfilePasswordForm()
+    return render_template('profile.html', form=form,
+                           password_form=password_form, tests=tests_list)
+
+
+@app.route('/constructor')
+def constructor():
+    return render_template('constructor.html')
 
 
 if __name__ == '__main__':

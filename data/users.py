@@ -16,6 +16,7 @@ class User(SqlAlchemyBase, UserMixin):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
     role = sqlalchemy.Column(sqlalchemy.String, default='member')
+    status = sqlalchemy.Column(sqlalchemy.String, default='ON', nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String,
                               index=True, unique=True, nullable=True)
 
