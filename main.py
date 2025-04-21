@@ -3,7 +3,7 @@ import datetime
 from config import SECRET_KEY
 
 # ------ Импорт flask инструментов
-from flask import Flask, render_template, session, redirect
+from flask import Flask, render_template, redirect
 
 # ------ Импорт инструментов для регистрации
 from flask_login import (LoginManager, login_user, login_required,
