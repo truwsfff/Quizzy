@@ -42,7 +42,7 @@ function createQuestionBlock() {
 function removeQuestion(button) {
     const card = button.closest(".card");
     card.remove();
-    questionCount--;  // уменьшаем счётчик при удалении
+    questionCount--;
 }
 
 function updateAnswersUI(questionId, type) {

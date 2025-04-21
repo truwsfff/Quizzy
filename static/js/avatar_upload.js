@@ -1,5 +1,5 @@
 document.getElementById("avatar-form").addEventListener("submit", async function(e) {
-    e.preventDefault();  // не даём форме перезагрузить страницу
+    e.preventDefault();
 
     const formData = new FormData();
     const fileInput = document.getElementById("avatar-input");
@@ -12,7 +12,7 @@ document.getElementById("avatar-form").addEventListener("submit", async function
 
     if (response.ok) {
         const data = await response.json();
-        document.getElementById("avatar-preview").src = data.new_avatar_url + "?t=" + new Date().getTime(); // обновляем аватар, добавляем ?t=... чтобы избежать кеша
+        document.getElementById("avatar-preview").src = data.new_avatar_url + "?t=" + new Date().getTime();
     } else {
         alert("Ошибка при загрузке!");
     }
