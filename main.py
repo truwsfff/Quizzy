@@ -1,14 +1,19 @@
 # ------ Импорт прочих библиотек
 import datetime
+import os
+from time import time
+from PIL import Image
+from werkzeug.utils import secure_filename
+
 from config import SECRET_KEY
 
 # ------ Импорт flask инструментов
-from flask import Flask, render_template, redirect
+from flask import (Flask, render_template, redirect, jsonify, url_for,
+                   request, abort)
 
 # ------ Импорт инструментов для регистрации
 from flask_login import (LoginManager, login_user, login_required,
-                         logout_user, \
-                         current_user)
+                         logout_user, current_user)
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
 from forms.profile_general_form import ProfileGeneralForm
@@ -21,9 +26,11 @@ from data.users import User
 # ------ Конфигурация приложения
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
+app.config['UPLOAD_FOLDER'] = 'static/avatars'
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
+app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -34,12 +41,32 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
+# ------ обработка ошиброк
+
+
+@app.errorhandler(400)
+def handle_400(error):
+    return jsonify(error=error.description), 400
+
+
+@app.errorhandler(413)
+def handle_413(error):
+    return jsonify(error='Загружаемый файл превышает 4 МБ'), 413
+
+
+@app.errorhandler(415)
+def handle_415(error):
+    return jsonify(error=error.description), 415
+
+
 # ------ Все роуты приложения
+# ------ Главная страница
 @app.route('/')
 def start_window():
     return render_template('start.html')
 
 
+# ------ Роуты аутентификации
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
     form = RegisterForm()
@@ -111,6 +138,7 @@ def login():
     return render_template('login.html', form=form)
 
 
+# ------ роут выхода из системы
 @app.route('/logout')
 @login_required
 def logout():
@@ -118,6 +146,7 @@ def logout():
     return redirect("/")
 
 
+# ------ роуты профиля
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -129,6 +158,68 @@ def profile():
                            password_form=password_form, tests=tests_list)
 
 
+@app.route('/profile/avatar', methods=['POST'])
+@login_required
+def avatar_handler():
+    if 'avatar' not in request.files:
+        abort(400, description='файл не найден')
+
+    file = request.files['avatar']
+
+    if file.filename == '':
+        abort(415, description='Файл не выбран')
+
+    if not allowed_extension(file.filename):
+        abort(415, description='Недопустимый тип файла')
+
+    if not is_image(file.stream):
+        abort(415, description='Файл не является изображением')
+
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(
+        User.email == current_user.email).first()
+
+    if user.avatar != 'avatars/quizzy_logo.png':
+        os.remove(f'static/{user.avatar}')
+
+    extens = file.filename.rsplit('.', 1)[1].lower()
+    filename = secure_filename(f'avatar_{next(generator_names())}.{extens}')
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+
+    user.avatar = f'avatars/{filename}'
+    db_sess.commit()
+
+    return jsonify(
+        {'avatar_url': url_for('static', filename=user.avatar)})
+
+
+def allowed_extension(filename):
+    allowed = ['png', 'jpg', 'jpeg']
+    if '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed:
+        return True
+    else:
+        return False
+
+
+def is_image(file):
+    try:
+        image = Image.open(file)
+        image.verify()
+        file.seek(0)
+        return True
+    except:
+        return False
+
+
+def generator_names():
+    while True:
+        text = '{}'
+        t = time()
+        yield text.format(''.join(str(t).split('.')))
+
+
+# ------ роут конструктора тестов
 @app.route('/constructor')
 def constructor():
     return render_template('constructor.html')

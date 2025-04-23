@@ -19,6 +19,8 @@ class User(SqlAlchemyBase, UserMixin):
     status = sqlalchemy.Column(sqlalchemy.String, default='ON', nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String,
                               index=True, unique=True, nullable=True)
+    avatar = sqlalchemy.Column(sqlalchemy.String, default='avatars/quizzy_logo.png',
+                               nullable=True)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
