@@ -7,6 +7,7 @@
     <div class="row align-items-center mb-4">
         <div class="col-md-3 text-center">
     <form method="POST" action="/profile/avatar" enctype="multipart/form-data" id="avatarForm">
+        {{ form.csrf_token }}
         <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Аватар пользователя" class="img-thumbnail mb-2" style="max-width: 150px;">
 
         <input type="file" name="avatar" id="avatarInput" accept="image/*" class="d-none">
