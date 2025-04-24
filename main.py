@@ -4,12 +4,12 @@ import os
 from time import time
 from PIL import Image
 from werkzeug.utils import secure_filename
-
 from config import SECRET_KEY
 
 # ------ Импорт flask инструментов
 from flask import (Flask, render_template, redirect, jsonify, url_for,
                    request, abort)
+from flask_wtf.csrf import CSRFProtect
 
 # ------ Импорт инструментов для регистрации
 from flask_login import (LoginManager, login_user, login_required,
@@ -31,6 +31,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
 app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -221,8 +222,17 @@ def generator_names():
 
 # ------ роут конструктора тестов
 @app.route('/constructor')
+@login_required
 def constructor():
     return render_template('constructor.html')
+
+
+@app.route('/constructor/create_test', methods=['GET', 'POST'])
+@login_required
+def constructor_create_test():
+    datas = request.get_json()
+    print(datas)
+    return jsonify(success=True), 200
 
 
 if __name__ == '__main__':

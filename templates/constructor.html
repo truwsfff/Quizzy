@@ -1,39 +1,249 @@
 {% extends "base.html" %}
-{% block title %}Создание теста{% endblock %}
+
+{% block title %}Создание тестирования{% endblock %}
+
+{% block head %}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="mb-4 text-center">Создание тестирования</h1>
-    <hr>
+  <h1 class="mb-4 text-center">Создание тестирования</h1>
+  <hr>
 
-    <form method="POST" action="/create_test" id="testForm">
-        <div class="mb-3">
-            <label for="testTitle" class="form-label">Название теста</label>
-            <input type="text" class="form-control" id="testTitle" name="title" placeholder="Введите название" required>
-        </div>
+  <form id="testForm">
+    <div class="mb-3">
+      <label for="testTitle" class="form-label">Название теста</label>
+      <input type="text" class="form-control" id="testTitle" placeholder="Введите название" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="testDescription" class="form-label">Описание теста</label>
-            <textarea class="form-control" id="testDescription" name="description" rows="2" placeholder="Опишите тест"></textarea>
-        </div>
+    <div class="mb-3">
+      <label for="testDescription" class="form-label">Описание теста</label>
+      <textarea class="form-control" id="testDescription" rows="2" placeholder="Опишите тест"></textarea>
+    </div>
 
-        <hr class="my-4">
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="privateTest">
+      <label class="form-check-label" for="privateTest">Сделать приватным</label>
+    </div>
 
-        <div id="questionsContainer">
-        </div>
+    <div class="mb-3">
+      <label for="testType" class="form-label">Тип теста</label>
+      <select class="form-select" id="testType">
+        <option value="ordinary" selected>Обычный</option>
+        <option value="criteria">С критериями оценивания</option>
+      </select>
+    </div>
 
-        <div class="text-center">
-            <button type="button" class="btn btn-outline-primary mb-4" id="addQuestionBtn">Добавить вопрос</button>
-        </div>
+    <div id="criteriaSettings" class="mb-3" style="display: none;">
+      <label class="form-label">Критерии оценивания (мин. кол-во верных ответов для оценки)</label>
+      <div class="row g-2">
+        {% for grade in [2,3,4,5] %}
+          <div class="col-auto">
+            <label for="minCorrect{{ grade }}" class="form-label">{{ grade }}</label>
+            <input type="number" class="form-control" id="minCorrect{{ grade }}" min="0" placeholder="...">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
 
-        <div class="text-center">
-            <button type="submit" class="btn btn-success">Создать тест</button>
-        </div>
-    </form>
+    <hr class="my-4">
+
+    <div id="questionsContainer"></div>
+
+    <div class="text-center mb-3">
+      <button type="button" class="btn btn-outline-primary" id="addQuestionBtn">Добавить вопрос</button>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-success">Создать тест</button>
+    </div>
+  </form>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/constructor_logic.js') }}"></script>
+<script>
+let questionCount = 0;
+const maxQuestions = 15;
+
+function createQuestionBlock() {
+  if (questionCount >= maxQuestions) {
+    alert("Вы не можете добавить более 15 вопросов.");
+    return;
+  }
+  const qid = questionCount++;
+  const card = document.createElement('div');
+  card.className = 'card mb-4 shadow-sm';
+  card.dataset.qid = qid;
+
+  card.innerHTML = `
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Текст вопроса</label>
+        <input type="text" class="form-control question-text" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Тип вопроса</label>
+        <select class="form-select question-type">
+          <option value="single" selected>Один верный ответ</option>
+          <option value="multiple">Несколько верных ответов</option>
+          <option value="text">Вписать ответ</option>
+        </select>
+      </div>
+      <div class="answer-options"></div>
+      <div class="mb-3 text-end">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeQuestion(this)">Удалить вопрос</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('questionsContainer').appendChild(card);
+  updateAnswersUI(qid, 'single');
+}
+
+function removeQuestion(btn) {
+  btn.closest('.card').remove();
+  questionCount--;
+}
+
+function updateAnswersUI(qid, type) {
+  const container = document.querySelector(`.card[data-qid="${qid}"] .answer-options`);
+  if (type === 'text') {
+    container.innerHTML = `
+      <div class="mb-3">
+        <label class="form-label">Верный ответ</label>
+        <input type="text" class="form-control text-answer" required>
+      </div>
+    `;
+    return;
+  }
+  container.innerHTML = `
+    <div class="answers-list"></div>
+    <button type="button" class="btn btn-sm btn-outline-secondary add-answer-btn">Добавить вариант ответа</button>
+  `;
+  const list = container.querySelector('.answers-list');
+  for (let i = 0; i < 2; i++) {
+    createAnswerRow(list, qid, type);
+  }
+  container.querySelector('.add-answer-btn')
+           .onclick = () => createAnswerRow(list, qid, type);
+}
+
+function createAnswerRow(list, qid, type) {
+  const idx = list.querySelectorAll('.answer-row').length;
+  const row = document.createElement('div');
+  row.className = 'mb-2 answer-row d-flex align-items-center gap-2';
+  const inpType = type === 'multiple' ? 'checkbox' : 'radio';
+  const nameAttr = type === 'single' ? `name="correct-${qid}"` : '';
+  row.innerHTML = `
+    <input type="${inpType}" class="answer-correct" value="${idx}" ${nameAttr}>
+    <input type="text" class="form-control answer-text" placeholder="Вариант ответа" required>
+    <button type="button" class="btn btn-sm btn-outline-danger remove-answer-btn">✕</button>
+  `;
+  row.querySelector('.remove-answer-btn').onclick = () => {
+    row.remove();
+    if (type !== 'text' && list.querySelectorAll('.answer-row').length === 0) {
+      const card = list.closest('.card');
+      card.remove();
+      questionCount--;
+    }
+  };
+  list.appendChild(row);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  createQuestionBlock();
+  document.getElementById('addQuestionBtn')
+          .addEventListener('click', createQuestionBlock);
+
+  document.getElementById('questionsContainer')
+          .addEventListener('change', function(e) {
+    if (e.target.classList.contains('question-type')) {
+      const qid = e.target.closest('.card').dataset.qid;
+      updateAnswersUI(qid, e.target.value);
+    }
+  });
+
+  document.getElementById('testType')
+          .addEventListener('change', function() {
+    document.getElementById('criteriaSettings').style.display =
+      this.value === 'criteria' ? 'block' : 'none';
+  });
+
+  document.getElementById('testForm')
+          .addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Валидация: для single — один выбранный, для multiple — хотя бы один
+    const cards = document.querySelectorAll('.card[data-qid]');
+    for (const card of cards) {
+      const type = card.querySelector('.question-type')?.value;
+      if (type === 'single' && !card.querySelector('.answer-correct:checked')) {
+        alert('Во всех вопросах с одним правильным ответом нужно выбрать этот ответ.');
+        return;
+      }
+      if (type === 'multiple' && card.querySelectorAll('.answer-correct:checked').length === 0) {
+        alert('В вопросах с несколькими правильными ответами нужно отметить хотя бы один.');
+        return;
+      }
+    }
+
+    // Сбор данных
+    const payload = {
+      title: document.getElementById('testTitle').value,
+      description: document.getElementById('testDescription').value,
+      is_private: document.getElementById('privateTest').checked,
+      test_type: document.getElementById('testType').value,
+      criteria: {},
+      questions: []
+    };
+    if (payload.test_type === 'criteria') {
+      [2,3,4,5].forEach(g => {
+        const elem = document.getElementById(`minCorrect${g}`);
+        const v = elem ? elem.value : null;
+        payload.criteria[g] = v ? +v : null;
+      });
+    }
+
+    document.querySelectorAll('.card[data-qid]').forEach(card => {
+      const q = {
+        text: card.querySelector('.question-text')?.value || '',
+        type: card.querySelector('.question-type')?.value || ''
+      };
+      if (q.type === 'text') {
+        q.answer = card.querySelector('.text-answer')?.value || '';
+      } else {
+        q.options = Array.from(card.querySelectorAll('.answer-text'))
+                         .map(inp => inp.value);
+        if (q.type === 'single') {
+          const sel = card.querySelector('.answer-correct:checked');
+          q.correct = sel ? +sel.value : null;
+        } else {
+          q.correct = Array.from(card.querySelectorAll('.answer-correct:checked'))
+                           .map(inp => +inp.value);
+        }
+      }
+      payload.questions.push(q);
+    });
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const resp = await fetch('{{ url_for("constructor_create_test") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload)
+    });
+
+    if (resp.ok) {
+      window.location.href = '/success';
+    } else {
+      const errors = await resp.json();
+      alert('Ошибка сохранения: ' + JSON.stringify(errors));
+    }
+  });
+});
+</script>
 {% endblock %}
