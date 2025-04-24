@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from config import SECRET_KEY
 from resources.tests_resource import TestsResource
 from requests import get
+from waitress import serve
 
 # ------ Импорт flask инструментов
 from flask import (Flask, render_template, redirect, jsonify, url_for,
@@ -388,4 +389,4 @@ def submit_test(test_id):
 
 if __name__ == '__main__':
     db_session.global_init("db/quizzy.db")
-    app.run(port=8080, host='0.0.0.0')
+    serve(app, host='0.0.0.0', port=8080)
