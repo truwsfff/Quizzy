@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Результаты теста{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-3">Результаты теста: {{ test.title }}</h2>
+  <p>{{ test.description }}</p>
+  <hr>
+
+  <div class="mb-4">
+    <p><strong>Правильных ответов:</strong> {{ correct }} из {{ total }}</p>
+    <p><strong>Процент верных ответов:</strong> {{ score|round(2) }}%</p>
+  </div>
+
+  {% for detail in details %}
+    {% set q = test.questions[detail.question_index] %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <p><strong>Вопрос {{ loop.index }}:</strong> {{ q.text }}</p>
+        <p>
+          <span class="badge bg-{{ 'success' if detail.is_correct else 'danger' }}">
+            {{ 'Правильно' if detail.is_correct else 'Неправильно' }}
+          </span>
+        </p>
+        <p><strong>Ваш ответ:</strong>
+          {% if q.type == 'text' %}
+            {{ detail.user_answer }}
+          {% elif q.type == 'single' %}
+            {% if detail.user_answer is not none %}
+              {{ q.options[detail.user_answer] }}
+            {% else %}
+              <em>Не выбран</em>
+            {% endif %}
+          {% elif q.type == 'multiple' %}
+            {% if detail.user_answer %}
+              {% for idx in detail.user_answer %}
+                {{ q.options[idx] }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              <em>Не отмечено</em>
+            {% endif %}
+          {% endif %}
+        </p>
+        {% if not detail.is_correct %}
+        <p><strong>Правильный ответ:</strong>
+          {% if q.type == 'text' %}
+            {{ q.answer }}
+          {% elif q.type == 'single' %}
+            {{ q.options[q.correct] }}
+          {% elif q.type == 'multiple' %}
+            {% for idx in q.correct %}
+              {{ q.options[idx] }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          {% endif %}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('start_window') }}" class="btn btn-outline-primary">Вернуться к списку тестов</a>
+  </div>
+</div>
+{% endblock %}

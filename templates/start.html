@@ -2,4 +2,25 @@
 
 {% block content %}
     <h1>Quizzy - сайт для создания и проведения тестирований.</h1>
+<h2>Публичные тестирования:</h2>
+
+    {% if tests %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for test in tests %}
+            <div class="col">
+                <div class="card test-card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ test["title"] }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Дата создания: {{ test["created_date"] }}</h6>
+                        <p class="card-text">{{ test["description"] }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center my-5">
+            <p class="fs-5 text-muted">На сайте пока нет публичных тестирований!</p>
+        </div>
+    {% endif %}
 {% endblock %}

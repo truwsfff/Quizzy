@@ -33,7 +33,7 @@
     </button>
 
     <div class="collapse" id="changePasswordForm">
-        <form method="POST" action="">
+        <form method="POST" action="/profile/password_update">
             {{ password_form.hidden_tag() }}
 
             <div class="mb-3">
@@ -91,7 +91,7 @@
                 <div class="card test-card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ test.title }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">Дата создания: {{ test.creation_date }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Дата создания: {{ test.created_date.strftime('%d.%m.%Y') }}</h6>
                         <p class="card-text">{{ test.description }}</p>
                     </div>
                 </div>

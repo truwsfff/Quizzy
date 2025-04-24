@@ -238,7 +238,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     if (resp.ok) {
-      window.location.href = '/success';
+      window.location.href = '/constructor/success';
     } else {
       const errors = await resp.json();
       alert('Ошибка сохранения: ' + JSON.stringify(errors));
